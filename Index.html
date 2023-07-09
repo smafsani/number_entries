@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keep Track of Your Data</title>
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            font-family: sans-serif;
+        }
+        .header h2{
+            text-align: center;
+            background-color: #3b3b41;
+            color: #fff;
+            padding: 20px 0;
+            margin-bottom: 20px;
+        }
+        .container{
+            display: flex;
+            padding: 0 20px;
+            justify-content: center;
+        }
+
+        .container .top{
+            width: 30%;
+        }
+        .container .top .box{
+            background-color: #eef;
+            border-collapse: collapse;
+        }
+        .container .top .box tbody td{
+            padding: 25px 32px;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            user-select: none;
+            font-size: 20px;
+        }
+        .container .top .box tbody .text-field{
+            padding: 0;
+            position: relative;
+        }
+        .container .top .box tbody .text-field input{
+            padding: 15px 5px;
+            font-size: 14px;
+            font-family: sans-serif;
+            outline: none;
+            border: none;
+            text-align: center;
+            width: 100%;
+        }
+        .container .top .box tbody .text-field .duplicate-alert{
+            position: absolute;
+            width: 100%;
+            left: 0;
+            bottom: 0;
+            font-size: 12px;
+            text-align: left;
+        }
+        .container .top .box tbody .add-button{
+            position: relative;
+        }
+        .container .top .box tbody .add-button div{
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .container .top .box tbody .dial-btn:hover,
+        .container .top .box tbody .add-button:hover,
+        .container .top .box tbody .del-button:hover{
+            background-color: #cfcfdf;
+        }
+        .container .top .box tbody .add-button button{
+            background-color: transparent;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+        .container .top .alert{
+            color: #f00;
+        }
+
+        .container .down{
+            width: 400px;
+        }
+        .container .down table{
+            text-align: center;
+            font-size: 12px;
+            width: 100%;
+        }
+        .container .down table{
+            border-collapse: collapse;
+        }
+        .container .down table thead{
+            background-color: #0b263f;
+        }
+        .container .down table thead tr th{
+            background-color: #0b263f;
+            padding: 5px 20px;
+            color: #fff;
+            font: 13px;
+        }
+        .container .down table tbody tr{
+            border-bottom: 1px solid #aaa;
+        }
+        .container .down table tbody tr td{
+            padding: 5px;
+            font-size: 14px;
+        }
+        .input-div .save{
+            background-color: #06df2a;
+            border: 2px solid #06aa22;
+            padding-top: 5px !important;
+            padding-bottom: 5px !important;
+            font-size: 14px !important;
+            font-family: sans-serif !important;
+        }
+        .input-div .save:hover{
+            background-color: #06aa22;
+        }
+        .container .down .clear-btn{
+            display: inline-flex;
+            width: 100%;
+            justify-content: end;
+            padding-right: 20px;
+        }
+        .container .down .clear{
+            background-color: #fc2626;
+            color: #fff;
+            padding: 10px !important;
+            margin-top: 10px;
+        }
+        .container .down .print{
+            background-color: #0a9677;
+            color: #fff;
+            margin-right: 10px !important;
+            padding: 10px !important;
+            margin-top: 10px;
+        }
+        .container .down .print:hover{
+            background-color: #07725b;
+        }
+        .container .down .clear:hover{
+            background-color: rgb(207, 3, 3);
+        }
+        table tbody tr .empty{
+            text-align: center;
+            font-size: 20px;
+            color: #555;
+        }
+
+        .hide{
+            display: none;
+        }
+        .hidden{
+            visibility: hidden;
+            position: absolute;
+        }
+
+        @media only screen and (max-width: 620px){
+            .container .down table{
+                width: 100%;
+            }
+            .modal-shade .modal-body{
+                margin: 0 30px;
+            }
+            .modal-shade .modal-body p{
+                font-size: 12px;
+            }    
+        }
+
+        @media only screen and (max-width: 720px){
+            .container{
+                flex-direction: column;
+            }
+            .container .top,
+            .container .down{
+                width: 100%;
+            }
+            .container .down{
+                margin-top: 30px;
+            }
+            .modal-shade .modal-body{
+                margin: 0 30px;
+            }   
+        }
+
+        /* Modal */
+        .modal-shade{
+            position: absolute;
+            width: 100%;
+            height: 100vh;
+            top: 0;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        .modal-shade .modal-body{
+            display: flex;
+            justify-content: center;
+            scale: calc(0.1);
+            animation: modal_animate 0.3s linear forwards;
+            -o-animation: modal_animate 0.3s linear forwards;
+            -webkit-animation: modal_animate 0.3s linear forwards;
+            -moz-animation: modal_animate 0.3s linear forwards;
+            margin-top: -200px;
+        }
+        @keyframes modal_animate {
+            0%{
+                scale: calc(0.1);
+                margin-top: -200px;
+            }
+            100%{
+                scale: calc(1);
+                margin-top: 0;
+            }
+        }
+        .modal-shade .modal{
+            width: 600px;
+            height: fit-content;
+            background-color: #fff;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .modal-shade .modal p{
+            text-align: center;
+            margin-top: 5px;
+            color: #333;
+        }
+        .modal-shade .modal .logo{
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 10px solid #fad11b;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .modal-shade .modal .logo div{
+            width: fit-content;
+            font-size: 48px;
+            font-weight: bold;
+            color: #fad11b;
+        }
+        .modal-shade .modal .btn-box{
+            width: 100%;
+            text-align: center;
+            margin: 30px 0 20px 0;
+        } 
+        .modal-shade .modal .btn-box button{
+            width: 60px;
+            height: 35px;
+            border-radius: 6px;
+            margin: 0 3px;
+            color: #fff;
+            cursor: pointer;
+        }
+        .modal-shade .modal .btn-box button:nth-child(1){
+            background-color: #c2cac4;
+            border: 3px solid #aeb4af;
+        }
+        .modal-shade .modal .btn-box button:nth-child(2){
+            background-color: #f52d55;
+            border: 3px solid #f01a44;
+        }
+        .allowed-color{
+            background-color: #06df2a !important;
+            color: #000;
+            font-weight: bold;
+        }
+        .allowed-color:hover{
+            background-color: #03a71e !important;            
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Data Information</h2>
+    </div>
+    <div class="container">
+        <div class="top">
+            <table class="box">
+                <tbody>
+                    <tr>
+                        <td class="text-field" colspan="3">
+                            <input type="text" id="textField" value="" placeholder="Enter Number">
+                            <span class="alert duplicate-alert" style="display: none;">Number already used.</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="dial-btn" data-value="1">1</td>
+                        <td class="dial-btn" data-value="2">2</td>
+                        <td class="dial-btn" data-value="3">3</td>
+                    </tr>
+                    <tr>
+                        <td class="dial-btn" data-value="4">4</td>
+                        <td class="dial-btn" data-value="5">5</td>
+                        <td class="dial-btn" data-value="6">6</td>
+                    </tr>
+                    <tr>
+                        <td class="dial-btn" data-value="7">7</td>
+                        <td class="dial-btn" data-value="8">8</td>
+                        <td class="dial-btn" data-value="9">9</td>
+                    </tr>
+                    <tr>
+                        <td class="add-button"><div><button class="" id="addButton" disabled>Add</button></div></td>
+                        <td class="dial-btn" data-value="0">0</td>
+                        <td class="del-button" id="delButton">&#9003;</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="down">
+            <table>
+                <thead>
+                    <tr>
+                        <th>SL.</th>
+                        <th>Mobile</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    
+                </tbody>
+            </table>
+            <div class="clear-btn">
+                <button class="print" id="printButton">Print Data</button>
+                <button class="clear" id="clearButton">Clear All Data</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal-shade hide" id="clearModal">
+        <div class="modal-body">
+            <div class="modal">
+                <div class="logo"><div>?</div></div>
+                <p>Do you really want to clear all data?</p>
+                <div class="btn-box">
+                    <button id="modalNo">No</button>
+                    <button id="modalYes">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    let textField = document.getElementById("textField");
+    let delButton = document.getElementById("delButton");
+    let addButton = document.getElementById("addButton");
+    let clearButton = document.getElementById("clearButton");
+    let modalNo = document.getElementById("modalNo");
+    let modalYes = document.getElementById("modalYes");
+    let printButton = document.getElementById("printButton");
+    let duplicateAlert = document.getElementsByClassName('duplicate-alert')[0];
+    let status = 0;
+
+    window.onload = function(){
+        var data = JSON.parse(localStorage.getItem('dataStorageSeven7'));
+        if(data){
+            var datas = '';
+            for (let x in data){
+                datas += "<tr>"+
+                    `<td>${parseInt(x)+1}</td>`+
+                    `<td>${data[x]}</td>`+
+                "</tr>";
+            }
+            tableBody.innerHTML = datas;
+        }
+        else{
+            tableBody.innerHTML = '<tr><td colspan="2" class="empty" id="emptyField">No Data Found</td></tr>';
+        }
+    };
+
+    var dialButton = document.querySelectorAll('.dial-btn');
+    dialButton.forEach(element => {
+        element.addEventListener('click', function(){
+            textField.value += this.getAttribute('data-value');
+            var number = textField.value;
+            checkNumber(number);
+        });
+    });
+
+    textField.addEventListener('keyup', function(){
+        var number = this.value;
+        checkNumber(number);
+    });
+
+    function checkNumber(number){
+        var addButton = document.getElementById("addButton");
+        var available = 0;
+        if(addButton.classList.contains('allowed-color')){
+            addButton.classList.remove('allowed-color');
+        }
+        if(number.length == 11){
+            var data = JSON.parse(localStorage.getItem('dataStorageSeven7'));
+            for (let i in data){
+                if(data[i] == number){
+                    available = 1;
+                    break;
+                }
+            }
+            if(available == 0){
+                addButton.disabled = false;
+                duplicateAlert.style.display = "none";
+                if(textField.classList.contains("alert")){
+                    textField.classList.remove("alert");
+                }
+                if(!addButton.classList.contains('allowed-color')){
+                    addButton.classList.add('allowed-color');
+                }
+            }
+            else{
+                addButton.disabled = true;
+                duplicateAlert.style.display = "block";
+                if(!textField.classList.contains("alert")){
+                    textField.classList.add("alert");
+                }
+            }
+        }
+        else{
+            addButton.disabled = true;
+            duplicateAlert.style.display = "none";
+            if(textField.classList.contains("alert")){
+                textField.classList.remove("alert");
+            }
+        }
+    }
+
+    delButton.addEventListener('click', function(){
+        var value = textField.value;
+        if(value != ''){
+            value = value.substring(0, value.length-1);
+            textField.value = value;
+        }
+        checkNumber(value);
+    });
+
+    addButton.addEventListener('click', function(){
+        var number = document.getElementById('textField').value;
+        if(number.length != 11){
+            alert("Number must contain 11 characters.");
+        }
+        else{
+            writeFile(number);
+            if(addButton.classList.contains('allowed-color')){
+                addButton.classList.remove('allowed-color');
+            }
+        }
+    });
+
+    function writeFile(number){
+        let mainData = JSON.parse(localStorage.getItem('dataStorageSeven7'));
+        
+        if(!mainData){
+            mainData = [number];
+        }
+        else{
+            mainData.push(number);
+        }
+        html = "<tr>"+
+            `<td>${mainData.length}</td>`+
+            `<td>${number}</td>`+
+        "</tr>";
+        if(document.getElementById('emptyField')){
+            document.getElementById('emptyField').remove();
+        }
+        tableBody.innerHTML += html;
+        localStorage.setItem('dataStorageSeven7', JSON.stringify(mainData));
+        textField.value = '';
+        var addButton = document.getElementById("addButton");
+        addButton.disabled = true;
+    }
+
+    clearButton.addEventListener('click', function(){
+        if(clearModal.classList.contains('hide')){
+            clearModal.classList.remove('hide');
+        }
+    });
+    modalNo.addEventListener('click', function(){
+        if(!clearModal.classList.contains('hide')){
+            clearModal.classList.add('hide');
+        }
+    });
+    modalYes.addEventListener('click', function(){
+       
+        localStorage.removeItem('dataStorageSeven7');
+        tableBody.innerHTML = '<tr><td colspan="2" class="empty" id="emptyField">No Data Found</td></tr>';
+        duplicateAlert.style.display = "none";
+        if(textField.classList.contains("alert")){
+            textField.classList.remove("alert");
+        }
+        textField.value="";
+        // if(!clearModal.classList.contains('hide')){
+        //     clearModal.classList.add('hide');
+        // }
+        modalNo.click();
+    });
+
+    printButton.addEventListener('click', function(){
+        printData("dataStorageSeven7");
+    });
+    function printData(key){
+        var data = JSON.parse(localStorage.getItem(key));
+        if(data){
+            data = Object.values(data).join("\n");
+            
+            const blob = new Blob([data], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+
+            a.href = url;
+            a.download = `number_entries.txt`;
+            a.classList.add('hidden');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    }
+</script>
+</html>
